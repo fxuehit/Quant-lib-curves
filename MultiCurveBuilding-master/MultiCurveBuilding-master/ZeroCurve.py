@@ -43,6 +43,7 @@ class ZeroCurve(object):
         return ql.ZeroCurve(dates1,zeros1,
                             ql.Actual365Fixed(),ql.UnitedStates(),
                             ql.Linear(),ql.Continuous)
+
     def updateZeroRates(self,zeros):
         self.zerorates=zeros
         self.QLZeroCurve.linkTo(self.getQLZeroCurve())
@@ -128,7 +129,6 @@ class ZeroSpreadCurve(object):
     
     def register(self, i):  #register the index for the instrument
         self.observerindex.append(i)
-
 
     def updatedependency(self,curveset):
         curveset[self.basecurvename].registerderivedcurve(self)
