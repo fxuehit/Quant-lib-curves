@@ -29,8 +29,8 @@ def SABR(alpha,beta,rho,nu,F,K,time,MKT): # all variables are scalars
         VOL = (nu*logFK*A)/(x*B)
         diff = VOL - MKT
 
-    print round(VOL, 4),  '\t',
-    outvol.write('%r;' %round(VOL,4) )
+    print(round(VOL, 4),  '\t',
+    outvol.write('%r;' %round(VOL,4) ))
     if MKT==0:
         diff = 0
         vol_diff.write('%s;' %'No market data')
@@ -50,7 +50,7 @@ def smile(alpha,beta,rho,nu,F,K,time,MKT,i): # F, time and the parameters are sc
             shift(F,K)
         SABR(alpha,beta,rho,nu,F,K[j],time,MKT[j])
 
-    print ' '
+    print(' ')
     outvol.write('\n')
     vol_diff.write('\n')
     parameters.write('%f;%f;%f;%f;' %(alpha ,beta ,rho ,nu))

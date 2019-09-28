@@ -23,8 +23,8 @@ def build_eur():
     fixingDays = 2
     settlementDate = calendar.adjust(calendar.advance(today, fixingDays, Days))
 
-    print 'Today: {}'.format(today.weekday())
-    print 'Settlement date:: {}'.format(settlementDate.weekday())
+    print('Today: {}'.format(today.weekday()))
+    print('Settlement date:: {}'.format(settlementDate.weekday()))
 
     depositDayCounter = Actual360()
     termStructureDayCounter = Actual365Fixed()
