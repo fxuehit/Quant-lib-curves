@@ -68,8 +68,8 @@ if __name__=="__main__":
             calendar=UScalendar
             discurve='USDOIS'
             settledays=2
-            depo=cs.DEPO(valuationdate,quotes[i]/100.,tenors[i],settledays,
-                         daycount,calendar,discurve)
+            depo=cs.Deposit(valuationdate, quotes[i] / 100., tenors[i], settledays,
+                            daycount, calendar, discurve)
             curveset.addinstrument(depo)
             tenordates.append(depo.enddate)
         elif types[i]=='OIS':
@@ -297,10 +297,10 @@ if __name__=="__main__":
         calendar=USSGcalendar
         discurve='SGDFX'
         settledays=2
-        depo=cs.DEPO(valuationdate,quotes[i]/100.,tenors[i],settledays,
-                         daycount,calendar,discurve)
+        depo=cs.Deposit(valuationdate, quotes[i] / 100., tenors[i], settledays,
+                        daycount, calendar, discurve)
         curveset.addinstrument(depo)
-        tenordates.append(depo.enddate)        
+        tenordates.append(depo.enddate)
     curve=zc.ZeroCurve(curvelist[4],valuationdate,tenors,tenordates,zeros)
     curveset.addcurve(curvelist[4],curve)
     print('instruments for SGDCCS')

@@ -11,77 +11,70 @@ from numpy.linalg import inv
 from collections import OrderedDict
 
 
-class instrument(ABC):   #bootstrapping instrument details, construction and pricing of 
-    '''bootstrapping instrument: this class contains details of the instrment, '''
-    '''construction and pricing of intrument are done in curve bootstrapping class'''
-    '''because the the curves assignment and schedules need to be updated there'''
-    def __init__(self,
-                 valuationdate,
-                 quote,
-                 type):
-        self.valuationdate=valuationdate
-        self.quote=quote
-        self.type=type
+class Instrument(ABC):  # bootstrapping instrument details, construction and pricing of
+    """
+    base class of all financial instruments for curve and others
+
+    """
+    def __init__(self, valuationdate, quote, type_):
+        self.valuationdate = valuationdate
+        self.quote = quote
+        self.type = type_
         super().__init__()
 
     @abstractclassmethod
     def impliedquote(self):
         pass
+
     @abstractclassmethod
-    def registerindex(self, index):    #assign index to the instrument, so that Jacobian can be calculated 
+    def registerindex(self, index):  # assign index to the instrument, so that Jacobian can be calculated
         pass
+
     @abstractclassmethod
     def assigncurves(self, curves):
         pass
 
 
-class DEPO(instrument):
-    def __init__(self,
-                 valuationdate, 
-                 quote,
-                 tenor,
-                 settledays,
-                 daycount,
-                 calendar,
-                 discurve,
+class Deposit(Instrument):
+    def __init__(self, valuationdate, quote, tenor, settledays, daycount, calendar, discurve,
                  businessday_convention=ql.ModifiedFollowing):
-        super().__init__(valuationdate,quote,'DEPO')
-        self.tenor=tenor
-        self.daycount=daycount
-        self.calendar=calendar
-        self.businessday_convention=businessday_convention
-        #self.settledays=settledays
-        self.discurve=discurve   #discount curve name
-        if tenor=='ON':
-            self.startdate=valuationdate
-            self.enddate=self.calendar.advance(valuationdate,1,ql.Days)
-        elif tenor=='TN':
-            self.startdate=self.calendar.advance(valuationdate,1,ql.Days)
-            self.enddate=self.calendar.advance(self.startdate,1,ql.Days)
-        elif tenor=='SN':
-            self.startdate=self.calendar.advance(valuationdate,int(settledays),ql.Days)
-            self.enddate=self.calendar.advance(self.startdate,1,ql.Days)
+        super().__init__(valuationdate, quote, 'Deposit')
+        self.tenor = tenor
+        self.daycount = daycount
+        self.calendar = calendar
+        self.businessday_convention = businessday_convention
+        self.settledays = settledays
+        self.discurve = discurve   # discount curve name
+        if tenor == 'ON':
+            self.startdate = valuationdate
+            self.enddate =self.calendar.advance(valuationdate, 1, ql.Days)
+        elif tenor == 'TN':
+            self.startdate = self.calendar.advance(valuationdate, 1, ql.Days)
+            self.enddate = self.calendar.advance(self.start_date, 1, ql.Days)
+        elif tenor == 'SN':
+            self.startdate = self.calendar.advance(valuationdate, int(settledays), ql.Days)
+            self.enddate = self.calendar.advance(self.startdate, 1, ql.Days)
         else:
-            period=ql.Period(int(settledays),ql.Days)
-            self.startdate=self.calendar.advance(valuationdate,period)
-            period=ql.Period(tenor)
-            self.enddate=self.calendar.advance(self.startdate,period)
+            period = ql.Period(int(settledays), ql.Days)
+            self.startdate = self.calendar.advance(valuationdate, period)
+            period = ql.Period(tenor)
+            self.enddate = self.calendar.advance(self.startdate, period)
 
     def impliedquote(self):
-        yearfrac=self.daycount.yearFraction(self.startdate,self.enddate)
-        impliedquote=(self.curve.QLZeroCurve.discount(self.startdate) \
-                    /self.curve.QLZeroCurve.discount(self.enddate)-1)/yearfrac
+        yearfrac = self.daycount.yearFraction(self.startdate, self.enddate)
+        impliedquote = (self.curve.QLZeroCurve.discount(self.startdate) /
+                        self.curve.QLZeroCurve.discount(self.enddate) - 1) / yearfrac
         return impliedquote
     
-    def registerindex(self,index):
-        self.index=index
+    def registerindex(self, index):
+        self.index = index
 
     def assigncurves(self, curves):
-        self.curve=curves[self.discurve]
+        self.curve = curves[self.disc_curve]
         self.curve.register(self.index)
 
 
-class FRA(instrument):
+class FRA(Instrument):
     def __init__(self,
                  valuationdate,
                  quote,
@@ -117,7 +110,7 @@ class FRA(instrument):
         self.curve.register(self.index)
         
 
-class Futures(instrument):
+class Futures(Instrument):
     def __init__(self,
                  valuationdate,
                  quote,
@@ -125,7 +118,7 @@ class Futures(instrument):
                  length,
                  calendar,
                  daycount,
-                 discurve,
+                 discu,
                  futureindex,
                  futuretype='IMM',
                  bussinessday_convention=ql.ModifiedFollowing):
@@ -161,7 +154,7 @@ class Futures(instrument):
         self.curve.register(self.index)
 
 
-class SWAP(instrument):   #single currency fix-float swap
+class SWAP(Instrument):   #single currency fix-float swap
     def __init__(self,
                  valuationdate,
                  quote,             #fixed leg rate
@@ -247,7 +240,7 @@ class SWAP(instrument):   #single currency fix-float swap
         self.forcurve.register(self.index)
 
 
-class BSSWAP(instrument):   #single currency float-float basis swap
+class BSSWAP(Instrument):   #single currency float-float basis swap
     def __init__(self,
                  valuationdate,
                  quote,             #fixed leg rate
@@ -359,7 +352,7 @@ class BSSWAP(instrument):   #single currency float-float basis swap
         self.zLeg2forcurve.register(self.index)
 
     
-class OIS(instrument):
+class OIS(Instrument):
     def __init__(self,
                  valuationdate,
                  quote,             #fixed leg rate
@@ -425,7 +418,7 @@ class OIS(instrument):
         self.zcurve.register(self.index)
 
 
-class CCS(instrument):   #cross currency swap, can be fix-float or float-float and resettble
+class CCS(Instrument):   #cross currency swap, can be fix-float or float-float and resettble
     def __init__(self,
                  valuationdate,
                  quote,             #fixed leg rate
