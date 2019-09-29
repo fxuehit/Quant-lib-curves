@@ -112,7 +112,7 @@ class ZeroSpreadCurve(object):
                  +np.interp(datesS,x2,y2,left=y2[0],right=y2[-1])
         dates1.insert(0,self.valuationdate)
         zeros1=zeros1.tolist()
-        zeros1.insert(0,zeros1[0])
+        zeros1.inse(0,zeros1[0])
         calendar=ql.WeekendsOnly()
         dates1.append(calendar.advance(dates1[-1],1,ql.Years))
         zeros1.append(zeros1[-1])

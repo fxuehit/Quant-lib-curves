@@ -2,10 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e2eae4a4-5c3d-4e51-8aad-fa5f38461061" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/fxueh.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/fxueh.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/fxueh.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveBuilding.py" beforeDir="false" afterPath="$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveBuilding.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveSet.py" beforeDir="false" afterPath="$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveSet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/ZeroCurve.py" beforeDir="false" afterPath="$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/ZeroCurve.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -177,7 +178,14 @@
       <option name="project" value="LOCAL" />
       <updated>1569659408301</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="curves clean up">
+      <created>1569724339801</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1569724339801</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -197,7 +205,8 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="add simple sabr" />
     <MESSAGE value="curves" />
-    <option name="LAST_COMMIT_MESSAGE" value="curves" />
+    <MESSAGE value="curves clean up" />
+    <option name="LAST_COMMIT_MESSAGE" value="curves clean up" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -5,9 +5,14 @@
       <w>businessday</w>
       <w>daycount</w>
       <w>discurve</w>
+      <w>enddate</w>
+      <w>endmonth</w>
       <w>impliedquote</w>
       <w>registerindex</w>
       <w>settledays</w>
+      <w>spotdate</w>
+      <w>startdate</w>
+      <w>startmonth</w>
       <w>valuationdate</w>
       <w>yearfrac</w>
     </words>

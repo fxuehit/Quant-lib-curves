@@ -47,10 +47,10 @@ class Deposit(Instrument):
         self.discurve = discurve   # discount curve name
         if tenor == 'ON':
             self.startdate = valuationdate
-            self.enddate =self.calendar.advance(valuationdate, 1, ql.Days)
+            self.enddate = self.calendar.advance(valuationdate, 1, ql.Days)
         elif tenor == 'TN':
             self.startdate = self.calendar.advance(valuationdate, 1, ql.Days)
-            self.enddate = self.calendar.advance(self.start_date, 1, ql.Days)
+            self.enddate = self.calendar.advance(self.startdate, 1, ql.Days)
         elif tenor == 'SN':
             self.startdate = self.calendar.advance(valuationdate, int(settledays), ql.Days)
             self.enddate = self.calendar.advance(self.startdate, 1, ql.Days)
@@ -70,28 +70,20 @@ class Deposit(Instrument):
         self.index = index
 
     def assigncurves(self, curves):
-        self.curve = curves[self.disc_curve]
+        self.curve = curves[self.discurve]
         self.curve.register(self.index)
 
 
 class FRA(Instrument):
-    def __init__(self,
-                 valuationdate,
-                 quote,
-                 settledays,
-                 startmonth,
-                 endmonth,
-                 daycount,
-                 calendar,
-                 discurve,
+    def __init__(self, valuationdate, quote, settledays, startmonth, endmonth, daycount, calendar, discurve,
                  businessday_convention=ql.ModifiedFollowing):
-        super().__init__(valuationdate,quote,'FRA')
-        self.daycount=daycount
-        self.calendar=calendar
-        self.discurve=discurve   #discount curve name
-        period=ql.Period(int(settledays),ql.Days)
-        spotdate=self.calendar.advance(valuationdate,period)
-        period=ql.Period((startmonth),ql.Months)
+        super().__init__(valuationdate, quote, 'FRA')
+        self.daycount = daycount
+        self.calendar = calendar
+        self.discurve = discurve
+        period = ql.Period(int(settledays), ql.Days)
+        spotdate = self.calendar.advance(valuationdate, period)
+        period = ql.Period((startmonth), ql.Months)
         self.startdate=self.calendar.advance(spotdate,period,True)
         period=ql.Period((endmonth-startmonth),ql.Months)
         self.enddate=self.calendar.advance(self.startdate,period,businessday_convention,True)
@@ -118,7 +110,7 @@ class Futures(Instrument):
                  length,
                  calendar,
                  daycount,
-                 discu,
+                 discurve,
                  futureindex,
                  futuretype='IMM',
                  bussinessday_convention=ql.ModifiedFollowing):
@@ -154,7 +146,7 @@ class Futures(Instrument):
         self.curve.register(self.index)
 
 
-class SWAP(Instrument):   #single currency fix-float swap
+class Swap(Instrument):   #single currency fix-float swap
     def __init__(self,
                  valuationdate,
                  quote,             #fixed leg rate
@@ -191,7 +183,7 @@ class SWAP(Instrument):   #single currency fix-float swap
         self.enddate=self.paymentcalendar.advance(self.startdate,period,businessday_convention,True)
                
     def impliedquote(self):
-        impliedquote=self.QLSWAP.fairRate()
+        impliedquote = self.QLSWAP.fairRate()
         return impliedquote
 
     def registerindex(self, index):
@@ -240,7 +232,7 @@ class SWAP(Instrument):   #single currency fix-float swap
         self.forcurve.register(self.index)
 
 
-class BSSWAP(Instrument):   #single currency float-float basis swap
+class BasisSwap(Instrument):   #single currency float-float basis swap
     def __init__(self,
                  valuationdate,
                  quote,             #fixed leg rate
@@ -273,23 +265,23 @@ class BSSWAP(Instrument):   #single currency float-float basis swap
         self.enddate=self.calendar.advance(self.startdate,period,businessday_convention,True)
 
     def impliedquote(self):
-        NPV1=self.QLSWAP1.NPV()
-        NPV2=self.QLSWAP2.NPV()
-        bp=1e-4
-        impliedquote=(NPV2-NPV1)/self.QLSWAP1.floatingLegBPS()*bp \
-            /self.zdiscurve2.QLZeroCurve.discount(self.startdate)
-        impliedquote+=self.quote
+        NPV1 = self.QLSWAP1.NPV()
+        NPV2 = self.QLSWAP2.NPV()
+        bp = 1e-4
+        impliedquote = (NPV2 - NPV1) / self.QLSWAP1.floatingLegBPS() * bp \
+                       / self.zdiscurve2.QLZeroCurve.discount(self.startdate)
+        impliedquote += self.quote
         return impliedquote
     
     def registerindex(self, index):
         self.index=index
     
     def assigncurves(self, curves):
-        self.zLeg1forcurve=curves[self.Leg1forcurve]
-        self.zLeg2forcurve=curves[self.Leg2forcurve]
-        self.zdiscurve1=curves[self.Leg1discurve]
-        self.zdiscurve2=curves[self.Leg2discurve]
-        self.IBORIndex1=ql.IborIndex('IborIndex1',
+        self.zLeg1forcurve = curves[self.Leg1forcurve]
+        self.zLeg2forcurve = curves[self.Leg2forcurve]
+        self.zdiscurve1 = curves[self.Leg1discurve]
+        self.zdiscurve2 = curves[self.Leg2discurve]
+        self.IBORIndex1 = ql.IborIndex('IborIndex1',
                           ql.Period(self.Leg1Frequency),
                           self.settledays,
                           ql.USDCurrency(),
@@ -298,7 +290,7 @@ class BSSWAP(Instrument):   #single currency float-float basis swap
                           False,
                           self.daycount,
                           self.zLeg1forcurve.QLZeroCurve)
-        self.IBORIndex2=ql.IborIndex('IborIndex2',
+        self.IBORIndex2 = ql.IborIndex('IborIndex2',
                           ql.Period(self.Leg2Frequency),
                           self.settledays,
                           ql.USDCurrency(),
@@ -307,7 +299,7 @@ class BSSWAP(Instrument):   #single currency float-float basis swap
                           False,
                           self.daycount,
                           self.zLeg2forcurve.QLZeroCurve)
-        schedule1=ql.Schedule(self.startdate,
+        schedule1 = ql.Schedule(self.startdate,
                              self.enddate,
                              ql.Period(self.Leg1Frequency),
                              self.calendar,
@@ -315,7 +307,7 @@ class BSSWAP(Instrument):   #single currency float-float basis swap
                              ql.ModifiedFollowing,
                              ql.DateGeneration.Backward,
                              False)
-        schedule2=ql.Schedule(self.startdate,
+        schedule2 = ql.Schedule(self.startdate,
                              self.enddate,
                              ql.Period(self.Leg2Frequency),
                              self.calendar,
@@ -323,7 +315,7 @@ class BSSWAP(Instrument):   #single currency float-float basis swap
                              ql.ModifiedFollowing,
                              ql.DateGeneration.Backward,
                              False)
-        self.QLSWAP1=ql.VanillaSwap(ql.VanillaSwap.Payer,
+        self.QLSWAP1 = ql.VanillaSwap(ql.VanillaSwap.Payer,
                             1000000.0,
                             schedule1,
                             0.0,
@@ -332,7 +324,7 @@ class BSSWAP(Instrument):   #single currency float-float basis swap
                             self.IBORIndex1,
                             self.quote,
                             self.daycount)
-        self.QLSWAP2=ql.VanillaSwap(ql.VanillaSwap.Payer,
+        self.QLSWAP2 = ql.VanillaSwap(ql.VanillaSwap.Payer,
                             1000000.0,
                             schedule2,
                             0.0,
@@ -341,12 +333,12 @@ class BSSWAP(Instrument):   #single currency float-float basis swap
                             self.IBORIndex2,
                             0.0,
                             self.daycount)
-        engine=ql.DiscountingSwapEngine(self.zdiscurve1.QLZeroCurve)
+        engine = ql.DiscountingSwapEngine(self.zdiscurve1.QLZeroCurve)
         self.QLSWAP1.setPricingEngine(engine)
-        engine2=ql.DiscountingSwapEngine(self.zdiscurve2.QLZeroCurve)
+        engine2 = ql.DiscountingSwapEngine(self.zdiscurve2.QLZeroCurve)
         self.QLSWAP2.setPricingEngine(engine2)
         self.zdiscurve1.register(self.index)
-        if(self.Leg1discurve!=self.Leg2discurve):
+        if self.Leg1discurve != self.Leg2discurve:
             self.zdiscurve2.register(self.index)
         self.zLeg1forcurve.register(self.index)
         self.zLeg2forcurve.register(self.index)
@@ -360,10 +352,10 @@ class OIS(Instrument):
                  daycount,
                  calendar,
                  settledays,
-                 paymentlag=2,
+                 paymentlag = 2,
                  businessday_convention=ql.Following,
-                 Frequency=None, #following arguments are for swaps             
-                 curve=None,  #forcasting curve name
+                 Frequency = None, #following arguments are for swaps
+                 curve = None,  #forcasting curve name
                  ):
         super().__init__(valuationdate,quote,'OIS')
         self.maturity=maturity
@@ -380,7 +372,6 @@ class OIS(Instrument):
         period=ql.Period(int(paymentlag),ql.Days)
         self.enddate=self.calendar.advance(self.maturitydate,period)
         self.paymentlag=int(paymentlag)
-       
 
     def impliedquote(self):
         impliedquote=self.QLOIS.fairRate()
@@ -405,7 +396,7 @@ class OIS(Instrument):
                              ql.ModifiedFollowing,
                              ql.DateGeneration.Backward,
                              False)
-        self.QLOIS=ql.OvernightIndexedSwap(ql.OvernightIndexedSwap.Payer,
+        self.QLOIS = ql.OvernightIndexedSwap(ql.OvernightIndexedSwap.Payer,
                                             1000000.0,
                                             schedule,
                                             self.quote,
@@ -413,7 +404,7 @@ class OIS(Instrument):
                                             self.onindex,
                                             0.0,
                                             self.paymentlag)
-        engine=ql.DiscountingSwapEngine(self.zcurve.QLZeroCurve)
+        engine = ql.DiscountingSwapEngine(self.zcurve.QLZeroCurve)
         self.QLOIS.setPricingEngine(engine)
         self.zcurve.register(self.index)
 
@@ -537,7 +528,6 @@ class CCS(Instrument):   #cross currency swap, can be fix-float or float-float a
         impliedquote=(NPV2-NPV1)/self.Leg1BPS()*bp
         impliedquote+=self.quote
         return impliedquote
-    
 
     def registerindex(self, index):
         self.index=index
@@ -559,7 +549,7 @@ class CCS(Instrument):   #cross currency swap, can be fix-float or float-float a
                           self.Leg1Daycount,
                           self.zLeg1forcurve.QLZeroCurve)
         else:
-            self.IBORIndex1=ql.IborIndex('IborIndex1',
+            self.IBORIndex1 = ql.IborIndex('IborIndex1',
                           ql.Period(self.Leg1Frequency),
                           self.settledays,
                           ql.USDCurrency(),
@@ -568,7 +558,7 @@ class CCS(Instrument):   #cross currency swap, can be fix-float or float-float a
                           False,
                           self.Leg1Daycount,
                           self.zdiscurve1.QLZeroCurve)
-        self.IBORIndex2=ql.IborIndex('IborIndex2',
+        self.IBORIndex2 = ql.IborIndex('IborIndex2',
                           ql.Period(self.Leg2Frequency),
                           self.settledays,
                           ql.USDCurrency(),
@@ -577,7 +567,7 @@ class CCS(Instrument):   #cross currency swap, can be fix-float or float-float a
                           False,
                           self.Leg2Daycount,
                           self.zLeg2forcurve.QLZeroCurve)
-        schedule1=ql.Schedule(self.startdate,
+        schedule1 = ql.Schedule(self.startdate,
                              self.enddate,
                              ql.Period(self.Leg1Frequency),
                              self.Leg1PaymentCalendar,
@@ -691,36 +681,38 @@ class CCS(Instrument):   #cross currency swap, can be fix-float or float-float a
 
 
 class CurveSet(object):
-    """description of class"""
-    def __init__(self,valuationdate):
-        self.curveset=OrderedDict()
-        self.x0=[]      #initial guess
-        self.instruments=[]
-        self.quotes=[]
-        self.calculated=False
-        self.valuationdate=valuationdate
+    """
+    description of class
+    """
+    def __init__(self, valuationdate):
+        self.curveset = OrderedDict()
+        self.x0 = []  # initial guess
+        self.instruments = []
+        self.quotes = []
+        self.calculated = False
+        self.valuationdate = valuationdate
         
     def addcurve(self, name, curve):
-        self.curveset[name]=curve
-        self.x0+=self.curveset[name].zerorates
+        self.curveset[name] = curve
+        self.x0 += self.curveset[name].zerorates
 
     def addinstrument(self, inst):
-        #create quantlib ratehelper       
+        # create quantlib ratehelper
         self.instruments.append(inst)
-        inst.registerindex(len(self.instruments)-1)    
+        inst.registerindex(len(self.instruments) - 1)
 
-    def __costFunc(self,x):
-        #initialize instruments
-        n1=0
+    def __costFunc(self, x):
+        # initialize instruments
+        n1 = 0
         for item in self.curveset:
-            n2=len(self.curveset[item].zerorates)
-            self.curveset[item].updateZeroRates(x[n1:n1+n2].tolist())
-            n1=n1+n2
-        N=len(self.instruments)
-        error=np.zeros(N)
-        for i in range(0,len(self.instruments)):
-            impliedquote=self.instruments[i].impliedquote()
-            error[i]=impliedquote-self.instruments[i].quote
+            n2 = len(self.curveset[item].zerorates)
+            self.curveset[item].updateZeroRates(x[n1 : n1+n2].tolist())
+            n1 = n1 + n2
+        N = len(self.instruments)
+        error = np.zeros(N)
+        for i in range(0, len(self.instruments)):
+            impliedquote = self.instruments[i].impliedquote()
+            error[i] = impliedquote-self.instruments[i].quote
         print(error)
         return error
 
@@ -811,8 +803,5 @@ class CurveSet(object):
             i+=len(self.curveset[curvename].tenors)
 
         sht.range((3,3)).options(transpose=True).value=invjacobian
-        
-        
-        
 
 

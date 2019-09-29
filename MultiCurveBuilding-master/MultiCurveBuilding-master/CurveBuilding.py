@@ -3,32 +3,32 @@ import CurveSet as cs
 import ZeroCurve as zc
 from numpy.linalg import inv
 
-if __name__=="__main__":
-    QLdaycount={
-        'ACT360':ql.Actual360(),
-        'ACT365':ql.Actual365Fixed(),
-        'Thirty360':ql.Thirty360()
+if __name__ == "__main__":
+    QLdaycount = {
+        'ACT360': ql.Actual360(),
+        'ACT365': ql.Actual365Fixed(),
+        'Thirty360': ql.Thirty360()
     }
-    QLbusiness_convention={
+    QLbusiness_convention = {
         'Following':ql.Following,
         'ModifiedFollowing':ql.ModifiedFollowing
     }
-    QLcalendar={
-        'UnitedStates':ql.UnitedStates(),
-        'Target':ql.TARGET(),
-        'Singapore':ql.Singapore()
+    QLcalendar = {
+        'UnitedStates': ql.UnitedStates(),
+        'Target': ql.TARGET(),
+        'Singapore': ql.Singapore()
      }
-    valuationdate=ql.Date(13,7,2017)
-    ql.Settings.instance().evaluationDate=valuationdate
-    currencies=['USD','SGD']
-    curveset=cs.CurveSet(valuationdate)
+    valuationdate = ql.Date(13, 7, 2017)
+    ql.Settings.instance().evaluationDate = valuationdate
+    currencies = ['USD', 'SGD']
+    curveset = cs.CurveSet(valuationdate)
     print(valuationdate)
-    #defind calendars
-    UScalendar=QLcalendar['UnitedStates']
-    SGcalendar=QLcalendar['Singapore']
-    USSGcalendar=ql.JointCalendar(UScalendar,SGcalendar,ql.JoinHolidays)
+    # define calendars
+    UScalendar = QLcalendar['UnitedStates']
+    SGcalendar = QLcalendar['Singapore']
+    USSGcalendar = ql.JointCalendar(UScalendar, SGcalendar, ql.JoinHolidays)
     #construct the curve set on the valuationdate
-    curveset=cs.CurveSet(valuationdate)
+    curveset = cs.CurveSet(valuationdate)
     #There are following six curves to be built
     #USDOIS: OIS zero curve for USD
     #USD3M: USD LIBOR 3M zero curve
@@ -176,21 +176,21 @@ if __name__=="__main__":
             Leg2forcurve='USD3M'
             businessday_convention=QLbusiness_convention['ModifiedFollowing']
             discurve='USDOIS'
-            swap=cs.SWAP(valuationdate,
-                        quotes[i]/100,            
-                        tenors[i],          
-                        calendar,
-                        calendar,
-                        settledays,
-                        businessday_convention,
-                        daycount,
-                        Leg1Frequency, 
-                        Leg1forcurve, 
-                        discurve,
-                        daycount,
-                        Leg2Frequency,
-                        Leg2forcurve,
-                        discurve)
+            swap=cs.Swap(valuationdate,
+                         quotes[i] / 100,
+                         tenors[i],
+                         calendar,
+                         calendar,
+                         settledays,
+                         businessday_convention,
+                         daycount,
+                         Leg1Frequency,
+                         Leg1forcurve,
+                         discurve,
+                         daycount,
+                         Leg2Frequency,
+                         Leg2forcurve,
+                         discurve)
             curveset.addinstrument(swap)
             tenordates.append(swap.enddate)
     curve=zc.ZeroCurve(curvelist[1],valuationdate,tenors,tenordates,zeros)
@@ -221,19 +221,19 @@ if __name__=="__main__":
         businessday_convention=QLbusiness_convention['ModifiedFollowing']
         discurve='USDOIS'
         paymentlag=2
-        bsswap=cs.BSSWAP(valuationdate,
-                        quotes[i]/100,            
-                        tenors[i],          
-                        daycount,
-                        calendar,
-                        settledays,
-                        businessday_convention,
-                        Leg1Frequency, 
-                        Leg1forcurve, 
-                        discurve, 
-                        Leg2Frequency,
-                        Leg2forcurve,
-                        discurve)
+        bsswap=cs.BasisSwap(valuationdate,
+                            quotes[i] / 100,
+                            tenors[i],
+                            daycount,
+                            calendar,
+                            settledays,
+                            businessday_convention,
+                            Leg1Frequency,
+                            Leg1forcurve,
+                            discurve,
+                            Leg2Frequency,
+                            Leg2forcurve,
+                            discurve)
         curveset.addinstrument(bsswap)
         tenordates.append(bsswap.enddate)
     curve=zc.ZeroSpreadCurve(curvelist[2],curvelist[1],valuationdate,tenors,tenordates,zeros)
@@ -262,21 +262,21 @@ if __name__=="__main__":
         Leg2forcurve='SGD6M'
         businessday_convention=QLbusiness_convention['ModifiedFollowing']
         discurve='SGDCCS'
-        swap=cs.SWAP(valuationdate,
-                        quotes[i]/100,            
-                        tenors[i],          
-                        calendar,
-                        calendar,
-                        settledays,
-                        businessday_convention,
-                        daycount,
-                        Leg1Frequency, 
-                        Leg1forcurve, 
-                        discurve,
-                        daycount,
-                        Leg2Frequency,
-                        Leg2forcurve,
-                        discurve)
+        swap=cs.Swap(valuationdate,
+                     quotes[i] / 100,
+                     tenors[i],
+                     calendar,
+                     calendar,
+                     settledays,
+                     businessday_convention,
+                     daycount,
+                     Leg1Frequency,
+                     Leg1forcurve,
+                     discurve,
+                     daycount,
+                     Leg2Frequency,
+                     Leg2forcurve,
+                     discurve)
         curveset.addinstrument(swap)
         tenordates.append(swap.enddate)
     curve=zc.ZeroCurve(curvelist[3],valuationdate,tenors,tenordates,zeros)
