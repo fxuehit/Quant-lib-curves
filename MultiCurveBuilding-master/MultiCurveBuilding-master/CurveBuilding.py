@@ -2,6 +2,13 @@ import QuantLib as ql
 import CurveSet as cs
 import ZeroCurve as zc
 from numpy.linalg import inv
+import csv
+
+
+def saveToCSV(data, path=None):
+    writer = csv.writer(open("test1.csv", "w"))
+    writer.writerows(data)
+
 
 if __name__ == "__main__":
     QLdaycount = {
@@ -351,9 +358,18 @@ if __name__ == "__main__":
                                     tenors,tenordates,zeros,nullbeforefirstpillar=True)
     curveset.addcurve(curvelist[5],curve)
     curveset.bootstrap()
+
+    output = [('curve name', 'tenor', 'tenor date', 'zero rate')]
     for curvename in curveset.curveset.keys():
         print(curvename)
         print(curveset.curveset[curvename].zerorates)
+
+        for i, _ in enumerate(curveset.curveset[curvename].zerorates):
+            row = curvename, curveset.curveset[curvename].tenors[i], \
+                  curveset.curveset[curvename].tenordates[i].serialNumber(), curveset.curveset[curvename].zerorates[i]
+            output.append(row)
+
+    saveToCSV(output)
     print('Jacobian Matrix dR/dz')
     print(curveset.DRDZ)
     print('Jacobian Matrix dz/dR')

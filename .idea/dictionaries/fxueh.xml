@@ -3,7 +3,9 @@
     <words>
       <w>assigncurves</w>
       <w>businessday</w>
+      <w>curveset</w>
       <w>daycount</w>
+      <w>derivedcurve</w>
       <w>discurve</w>
       <w>enddate</w>
       <w>endmonth</w>
@@ -13,8 +15,10 @@
       <w>spotdate</w>
       <w>startdate</w>
       <w>startmonth</w>
+      <w>tenordates</w>
       <w>valuationdate</w>
       <w>yearfrac</w>
+      <w>zerorates</w>
     </words>
   </dictionary>
 </component>

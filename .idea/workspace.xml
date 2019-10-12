@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e2eae4a4-5c3d-4e51-8aad-fa5f38461061" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/test1.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dictionaries/fxueh.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/fxueh.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveBuilding.py" beforeDir="false" afterPath="$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveBuilding.py" afterDir="false" />
@@ -33,7 +35,7 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -185,7 +187,14 @@
       <option name="project" value="LOCAL" />
       <updated>1569724339801</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="curves clean up">
+      <created>1569727096012</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1569727096012</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -227,51 +236,21 @@
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveSet.py</url>
-          <line>7</line>
-          <option name="timeStamp" value="15" />
+          <url>file://$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveBuilding.py</url>
+          <line>8</line>
+          <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveBuilding.py</url>
-          <line>1</line>
-          <option name="timeStamp" value="17" />
+          <line>371</line>
+          <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveSet.py</url>
-          <line>1</line>
-          <option name="timeStamp" value="18" />
+          <url>file://$PROJECT_DIR$/MultiCurveBuilding-master/MultiCurveBuilding-master/CurveBuilding.py</url>
+          <line>9</line>
+          <option name="timeStamp" value="24" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="PythonConfigurationType">
-        <watch expression="today.serialNumber()" language="Python" />
-        <watch expression="dt.datetime.date(dates[0])" language="Python" />
-      </configuration>
-    </watches-manager>
-  </component>
-  <component name="debuggerHistoryManager">
-    <expressions id="watch">
-      <expression>
-        <expression-string>dt.datetime.date(dates[0])</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>dates[0]</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>today.serialNumber()</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>serial</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-    </expressions>
   </component>
 </project>

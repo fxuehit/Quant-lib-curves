@@ -751,7 +751,7 @@ class CurveSet(object):
     def bootstrap(self):
         #assigncurves
         for curvename in self.curveset:
-            self.curveset[curvename].updatedependency(self.curveset)
+            self.curveset[curvename].updateDependency(self.curveset)
         for curvename in self.curveset:
             self.curveset[curvename].initializeQLZeroCurve()
 
@@ -759,7 +759,7 @@ class CurveSet(object):
             item.assigncurves(self.curveset)
         
         for curvename in self.curveset:
-            self.curveset[curvename].consolidateinstrument()       
+            self.curveset[curvename].consolidateInstrument()
 
         res=least_squares(self.__costFunc,self.x0,jac=self.jacobian, method='lm',ftol=1e-10, max_nfev=100)
         self.calculated=True
