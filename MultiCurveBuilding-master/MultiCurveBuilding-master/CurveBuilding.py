@@ -25,7 +25,8 @@ if __name__ == "__main__":
     QLcalendar = {
         'UnitedStates': ql.UnitedStates(),
         'Target': ql.TARGET(),
-        'Singapore': ql.Singapore()
+        'Singapore': ql.Singapore(),
+        'UnitedKingdom': ql.UnitedKingdom()
     }
     valuationdate = ql.Date(13, 7, 2017)
     ql.Settings.instance().evaluationDate = valuationdate
@@ -35,7 +36,9 @@ if __name__ == "__main__":
     # define calendars
     UScalendar = QLcalendar['UnitedStates']
     SGcalendar = QLcalendar['Singapore']
+    UKcalendar = QLcalendar['UnitedKingdom']
     USSGcalendar = ql.JointCalendar(UScalendar, SGcalendar, ql.JoinHolidays)
+    USUKcalendar = ql.JointCalendar(UScalendar, UKcalendar)
     # construct the curve set on the valuationdate
     curveset = cs.CurveSet(valuationdate)
     # There are following six curves to be built
@@ -381,34 +384,132 @@ if __name__ == "__main__":
     curveset.addcurve(curvelist[5], curve)
     curveset.bootstrap()
 
-    output = []
-    label = ['curve name', 'value date', 'tenor', 'tenor start', 'tenor end', 'quote', 'zero rate', 'error']
-    for curveName in curveset.curveset.keys():
-        print(curveName)
-        # print(curveset.curveset[curveName].zerorates)
-        market = marketQuote[curveName]
-        zeroCurve = curveset.curveset[curveName]
-        if len(market) != len(zeroCurve.zerorates):
-            raise RuntimeError('market quote and zero rate size not same!')
+    # save out put
+    save_output = False
+    if save_output:
+        output = []
+        label = ['curve name', 'value date', 'tenor', 'tenor start', 'tenor end', 'quote', 'zero rate', 'error']
+        for curveName in curveset.curveset.keys():
+            print(curveName)
+            # print(curveset.curveset[curveName].zerorates)
+            market = marketQuote[curveName]
+            zeroCurve = curveset.curveset[curveName]
+            if len(market) != len(zeroCurve.zerorates):
+                raise RuntimeError('market quote and zero rate size not same!')
 
-        for i, zr in enumerate(zeroCurve.zerorates):
-            if market[i][0] == zeroCurve.tenors[i]:
-                row = curveName, zeroCurve.tenors[i], market[i][1], '', \
-                      zeroCurve.tenordates[i].serialNumber(), market[i][2], zr, 0.0
-                output.append(row)
-        output.append(label)
+            for i, zr in enumerate(zeroCurve.zerorates):
+                if market[i][0] == zeroCurve.tenors[i]:
+                    row = curveName, zeroCurve.tenors[i], market[i][1], '', \
+                          zeroCurve.tenordates[i].serialNumber(), market[i][2], zr, 0.0
+                    output.append(row)
+            output.append(label)
 
-    result = df.from_records(output, columns=label)
-    result.to_csv('zero_rates1.csv')
+        result = df.from_records(output, columns=label)
+        result.to_csv('zero_rates1.csv')
 
-    # print('Jacobian Matrix dR/dZ')
-    # print(curveset.DRDZ)
-    data = curveset.DRDZ
-    jac = df(data[0:, 0:])
-    jac.to_csv('Jacobian_dRdZ.csv')
-    print('Jacobian Matrix dZ/dR')
-    print(inv(curveset.DRDZ))
-    data_ = inv(curveset.DRDZ)
-    jac_inv = df(data_[0:, 0:])
-    jac_inv.to_csv('Jacobian_dZdR.csv')
+        # print('Jacobian Matrix dR/dZ')
+        # print(curveset.DRDZ)
+        data = curveset.DRDZ
+        jac = df(data[0:, 0:])
+        jac.to_csv('Jacobian_dRdZ.csv')
+        print('Jacobian Matrix dZ/dR')
+        print(inv(curveset.DRDZ))
+        data_ = inv(curveset.DRDZ)
+        jac_inv = df(data_[0:, 0:])
+        jac_inv.to_csv('Jacobian_dZdR.csv')
+
+    # some test
+    usd_6m_2y = cs.Swap(valuationdate=valuationdate,
+                        quote=1.0,
+                        maturity='2Y',
+                        paymentcalendar=UScalendar,
+                        fixingcalendar=USUKcalendar,
+                        settledays=2.0,
+                        businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+                        Leg1daycount=QLdaycount['ACT360'],
+                        Leg1Frequency='6M',  # following arguments are for swaps
+                        Leg1forcurve=None,  # forcasting curve name
+                        Leg1discurve='USDOIS',  # discounting curve name
+                        Leg2daycount=QLdaycount['ACT360'],
+                        Leg2Frequency='6M',
+                        Leg2forcurve='USD6M',  # must be provided
+                        Leg2discurve='USDOIS')
+
+    usd_6m_2y.assigncurves(curveset.curveset)
+    print('USD LIBOR 6M 2Y Par Rate:\t{0:.4f}%'.format(usd_6m_2y.impliedquote() * 100.0))
+
+    usd_3m_1y = cs.Swap(valuationdate=valuationdate,
+                        quote=1.0,
+                        maturity='1Y',
+                        paymentcalendar=UScalendar,
+                        fixingcalendar=USUKcalendar,
+                        settledays=2.0,
+                        businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+                        Leg1daycount=QLdaycount['ACT365'],
+                        Leg1Frequency='1y',  # following arguments are for swaps
+                        Leg1forcurve=None,  # forcasting curve name
+                        Leg1discurve='USDOIS',  # discounting curve name
+                        Leg2daycount=QLdaycount['ACT360'],
+                        Leg2Frequency='3M',
+                        Leg2forcurve='USD3M',  # must be provided
+                        Leg2discurve='USDOIS')
+
+    usd_3m_1y.assigncurves(curveset.curveset)
+    print('USD LIBOR AMQM 1Y Par Rate:\t{0:.4f}%'.format(usd_3m_1y.impliedquote() * 100.0))
+
+    usd_3m_18m = cs.Swap(valuationdate=valuationdate,
+                        quote=1.0,
+                        maturity='1y6m',
+                        paymentcalendar=UScalendar,
+                        fixingcalendar=USUKcalendar,
+                        settledays=2.0,
+                        businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+                        Leg1daycount=QLdaycount['ACT360'],
+                        Leg1Frequency='3m',  # following arguments are for swaps
+                        Leg1forcurve=None,  # forcasting curve name
+                        Leg1discurve='USDOIS',  # discounting curve name
+                        Leg2daycount=QLdaycount['ACT360'],
+                        Leg2Frequency='3M',
+                        Leg2forcurve='USD3M',  # must be provided
+                        Leg2discurve='USDOIS')
+
+    usd_3m_18m.assigncurves(curveset.curveset)
+    print('USD LIBOR 3M 1Y6M Par Rate:\t{0:.4f}%'.format(usd_3m_18m.impliedquote() * 100.0))
+
+    usd_3m_30y = cs.Swap(valuationdate=valuationdate,
+                         quote=1.0,
+                         maturity='30y',
+                         paymentcalendar=UScalendar,
+                         fixingcalendar=USUKcalendar,
+                         settledays=2.0,
+                         businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+                         Leg1daycount=QLdaycount['ACT360'],
+                         Leg1Frequency='1y',  # following arguments are for swaps
+                         Leg1forcurve=None,  # forcasting curve name
+                         Leg1discurve='USDOIS',  # discounting curve name
+                         Leg2daycount=QLdaycount['ACT360'],
+                         Leg2Frequency='3M',
+                         Leg2forcurve='USD3M',  # must be provided
+                         Leg2discurve='USDOIS')
+
+    usd_3m_30y.assigncurves(curveset.curveset)
+    print('USD LIBOR 3M 31Y Par Rate:\t{0:.4f}%'.format(usd_3m_30y.impliedquote() * 100.0))
+
+    usd_3s6s_1y = cs.BasisSwap(
+        valuationdate=valuationdate,
+        quote=0.0,
+        maturity='1y',
+        daycount=QLdaycount['ACT360'],
+        calendar=UScalendar,
+        settledays=2,
+        businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+        Leg1Frequency='6m',  # following arguments are for swaps
+        Leg1forcurve='USD3M',  # forcasting curve name
+        Leg1discurve='USDOIS',  # discounting curve name
+        Leg2Frequency='6M',
+        Leg2forcurve='USD6M',
+        Leg2discurve='USDOIS')
+
+    usd_3s6s_1y.assigncurves(curveset.curveset)
+    print('USD LIBOR 3S6S 1Y Par Spread:\t{0:.4f}%'.format(usd_3s6s_1y.impliedquote() * 100.0))
 
