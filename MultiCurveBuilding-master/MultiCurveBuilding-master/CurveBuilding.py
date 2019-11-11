@@ -637,5 +637,19 @@ if __name__ == "__main__":
     usdsgd_ccbs_2y.assigncurves(curveset.curveset)
     print('USDSGD CCBS 2Y Par Spread:\t{0:.4f}%'.format(usdsgd_ccbs_2y.impliedquote() * 100.0))
 
+    delta_ladder = {}
+    npv = usd_6m_2y.QLSWAP.NPV()
+    for curve in curveset.curveset:
+        zeroCurve = curveset.curveset[curve]
+        curve_zero = zeroCurve.zerorates
+        for i in range(len(curve_zero)):
+            curve_zero[i] += 0.0001
+            zeroCurve.updateZeroRates(curve_zero)
+            bumped_npv = usd_6m_2y.QLSWAP.NPV()
+            delta_ladder[(curve, i)] = bumped_npv - npv
+            npv = bumped_npv
+
+    print(delta_ladder)
+
 
 
