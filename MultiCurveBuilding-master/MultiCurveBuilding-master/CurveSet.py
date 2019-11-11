@@ -943,6 +943,7 @@ class CurveSet(object):
         self.quotes = []
         self.calculated = False
         self.valuationdate = valuationdate
+        self.error = []
 
     def addcurve(self, name, curve):
         self.curveset[name] = curve
@@ -965,7 +966,8 @@ class CurveSet(object):
         for i in range(0, len(self.instruments)):
             impliedquote = self.instruments[i].impliedquote()
             error[i] = impliedquote - self.instruments[i].quote
-        print(error)
+        # print(error)
+        self.error.extend(error)
         return error
 
     def jacobian(self, x):
