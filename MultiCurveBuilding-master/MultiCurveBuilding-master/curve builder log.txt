@@ -1,5 +1,5 @@
 INFO:root:Curve building job started
-INFO:root:Curve build completed, total time taken 0:00:06.557278
+INFO:root:Curve build completed, total time taken 0:00:06.619000
 DEBUG:root:USD LIBOR 3S6S 1Y Par Spread:	0.2411%
 DEBUG:comtypes:Calling CoUnititialize()
 DEBUG:comtypes:CoUnititialize() done.

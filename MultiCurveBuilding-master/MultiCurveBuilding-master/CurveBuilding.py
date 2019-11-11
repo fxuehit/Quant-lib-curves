@@ -587,43 +587,55 @@ if __name__ == "__main__":
     print('USD LIBOR 3S6S 1Y Par Spread:\t{0:.4f}%'.format(usd_3s6s_1y.impliedquote() * 100.0))
     logging.debug('USD LIBOR 3S6S 1Y Par Spread:\t{0:.4f}%'.format(usd_3s6s_1y.impliedquote() * 100.0))
 
-    sgdusd_ccs_1y = cs.CCS(
-        valuationdate=valuationdate,
-        quote=0.0,
-        maturity='1y',
-        daycount=QLdaycount['ACT360'],
-        calendar=UScalendar,
-        settledays=2,
-        businessday_convention=QLbusiness_convention['ModifiedFollowing'],
-        Leg1Frequency='6m',  # following arguments are for swaps
-        Leg1forcurve='USD3M',  # forcasting curve name
-        Leg1discurve='USDOIS',  # discounting curve name
-        Leg2Frequency='6M',
-        Leg2forcurve='USD6M',
-        Leg2discurve='USDOIS')
+    usdsgd_ccs_2y = \
+        cs.CCS(valuationdate=valuationdate,
+               quote=0.0,
+               maturity='2y',
+               settledays=2,
+               businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+               Leg1Daycount=QLdaycount['ACT365'],
+               Leg1Frequency='6m',
+               Leg1forcurve=None,
+               Leg1discurve='SGDCCS',
+               Leg1FixingCalendar=UKcalendar,
+               Leg1PaymentCalendar=USSGcalendar,
 
-    valuationdate,
-    quote,  # fixed leg rate
-    maturity,  # string for the tenor, e.g. '3M'
-    settledays,
-    businessday_convention = None,
-    Leg1Daycount = None,
-    Leg1Frequency = None,  # following arguments are for swaps
-    Leg1forcurve = None,  # forcasting curve name
-    Leg1discurve = None,  # discounting curve name
-    Leg1FixingCalendar = None,
-    Leg1PaymentCalendar = None,
-    Leg2Daycount = None,
-    Leg2Frequency = None,
-    Leg2forcurve = None,
-    Leg2discurve = None,
-    Leg2FixingCalendar = None,
-    Leg2PaymentCalendar = None,
-    resettable = False,
-    resettableleg = None
+               Leg2Daycount=QLdaycount['ACT360'],
+               Leg2Frequency='6m',
+               Leg2forcurve='USD6M',
+               Leg2discurve='USDOIS',
+               Leg2FixingCalendar=UKcalendar,
+               Leg2PaymentCalendar=USSGcalendar,
+               resettable=True,
+               resettableleg=1)
 
-    usd_3s6s_1y.assigncurves(curveset.curveset)
-    print('USD LIBOR 3S6S 1Y Par Spread:\t{0:.4f}%'.format(usd_3s6s_1y.impliedquote() * 100.0))
-    logging.debug('USD LIBOR 3S6S 1Y Par Spread:\t{0:.4f}%'.format(usd_3s6s_1y.impliedquote() * 100.0))
+    usdsgd_ccs_2y.assigncurves(curveset.curveset)
+    print('USDSGD CCS 2Y Par Rate:\t{0:.4f}%'.format(usdsgd_ccs_2y.impliedquote() * 100.0))
+
+    usdsgd_ccbs_2y = \
+        cs.CCBS(valuationdate=valuationdate,
+                quote=0.0,
+                maturity='2y',
+                settledays=2,
+                businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+                Leg1Daycount=QLdaycount['ACT365'],
+                Leg1Frequency='6m',
+                Leg1forcurve='SGD6M',
+                Leg1discurve='SGDCCS',
+                Leg1FixingCalendar=SGcalendar,
+                Leg1PaymentCalendar=USSGcalendar,
+
+                Leg2Daycount=QLdaycount['ACT360'],
+                Leg2Frequency='6m',
+                Leg2forcurve='USD6M',
+                Leg2discurve='USDOIS',
+                Leg2FixingCalendar=UKcalendar,
+                Leg2PaymentCalendar=USSGcalendar,
+                resettable=True,
+                resettableleg=1)
+
+    usdsgd_ccbs_2y.assigncurves(curveset.curveset)
+    print('USDSGD CCBS 2Y Par Spread:\t{0:.4f}%'.format(usdsgd_ccbs_2y.impliedquote() * 100.0))
+
 
 
