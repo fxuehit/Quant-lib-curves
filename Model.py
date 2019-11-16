@@ -1,7 +1,7 @@
 import sys
 
 def modelbuilder():
-    print 'test started'
+    print('test started')
 
 
 class Fra(object):
@@ -30,14 +30,12 @@ class Fra(object):
         return 0
 
 
-
-
-
-
 if __name__ == '__main__':
-    print 'test end'
-    modelbuilder()
-    print 'test end'
+    print('test started')
+    answer = 111 / 999
+    print('The answer of 9999 times 1111 is: {:.5f} '.format(answer))
+    print('test end')
 else:
-    print 'not run'
-print __name__
+    print('not run')
+
+
