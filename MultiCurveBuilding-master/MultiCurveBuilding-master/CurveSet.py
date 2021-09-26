@@ -861,14 +861,14 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
                 if self.resettable and self.resettableleg == 1:
                     notional = 1000000
                     notional *= self.zdiscurve2.QLZeroCurve.discount(d) / self.zdiscurve1.QLZeroCurve.discount(d)
-                    notional *= self.zdiscurve1.QLZeroCurve.discount(
-                        self.startdate) / self.zdiscurve2.QLZeroCurve.discount(self.startdate)
+                    notional *= self.zdiscurve1.QLZeroCurve.discount(self.startdate) / self.zdiscurve2.QLZeroCurve.discount(self.startdate)
                     Notional1.append(notional)
                 else:
                     Notional1.append(1000000.)
                 gearing1.append(1.0)
                 spread1.append(self.quote)
                 fixedrate1.append(0.0)
+
             dummyNotional1.pop()
             Notional1.pop()
             gearing1.pop()
@@ -877,10 +877,10 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
             swapType1 = ql.VanillaSwap.Payer
             self.QLSWAP1 = ql.NonstandardSwap(swapType1, dummyNotional1, Notional1, schedule1,
                                               fixedrate1, self.Leg1Daycount, schedule1, self.IBORIndex1,
-                                              gearing1, spread1, self.Leg1Daycount, True, True,
-                                              ql.ModifiedFollowing)
+                                              gearing1, spread1, self.Leg1Daycount, True, True, ql.ModifiedFollowing)
         else:  # fixed-float CCS
             print('type error')
+
         schedule2 = ql.Schedule(self.startdate,
                                 self.enddate,
                                 ql.Period(self.Leg2Frequency),
@@ -899,8 +899,8 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
             if self.resettable and self.resettableleg == 2:
                 notional = 1000000.0
                 notional *= self.zdiscurve1.QLZeroCurve.discount(d) / self.zdiscurve2.QLZeroCurve.discount(d)
-                notional *= self.zdiscurve2.QLZeroCurve.discount(self.startdate) / self.zdiscurve1.QLZeroCurve.discount(
-                    self.startdate)
+                notional *= self.zdiscurve2.QLZeroCurve.discount(self.startdate) / \
+                            self.zdiscurve1.QLZeroCurve.discount(self.startdate)
                 Notional2.append(notional)
 
             else:
@@ -916,8 +916,7 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
         swapType2 = ql.VanillaSwap.Payer
         self.QLSWAP2 = ql.NonstandardSwap(swapType2, dummyNotional2, Notional2, schedule2,
                                           fixedrate2, self.Leg2Daycount, schedule2, self.IBORIndex2,
-                                          gearing2, spread2, self.Leg2Daycount, True, True,
-                                          ql.ModifiedFollowing)
+                                          gearing2, spread2, self.Leg2Daycount, True, True, ql.ModifiedFollowing)
 
         engine1 = ql.DiscountingSwapEngine(self.zdiscurve1.QLZeroCurve)
         self.QLSWAP1.setPricingEngine(engine1)

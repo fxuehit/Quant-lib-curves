@@ -1,7 +1,7 @@
 import sys
 
 def modelbuilder():
-    print 'test started'
+    print('test started')
 
 
 class Fra(object):
@@ -35,9 +35,10 @@ class Fra(object):
 
 
 if __name__ == '__main__':
-    print 'test end'
+    print('test end')
     modelbuilder()
-    print 'test end'
+    print('test end')
 else:
-    print 'not run'
-print __name__
+    print('not run')
+
+print(__name__)

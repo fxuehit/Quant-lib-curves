@@ -2,6 +2,7 @@ import math
 import matplotlib.pyplot as plt
 import QuantLib as QL
 import datetime as dt
+import json
 
 from QuantLib import Date, Days, Weeks, Months, Years, Period, January, February, March, April, May, June, \
     July, August, September, October, December, November
@@ -305,10 +306,16 @@ def pricing_test(curves):
     rates_c = [eonia_curve.forwardRate(d, TARGET().advance(d, 1, Days), Actual360(), Simple).rate() for d in dates]
     fig, ax = plt.subplots()
     new_dates = [ql_to_datetime(d) for d in dates]
+    serial_dates = [serial for serial in range(today.serialNumber(), end.serialNumber() + 1, 10)]
 
     ax.plot(new_dates, rates_c)
     fig.autofmt_xdate()
     plt.show()
+
+    zeroRate = dict(zip(serial_dates, rates_c))
+    with open("curve_eur.txt", 'w') as fout:
+        json_dumps_str = json.dumps(zeroRate, indent=4)
+        print(json_dumps_str, file=fout)
 
 
 def ql_to_datetime(d):

@@ -119,7 +119,7 @@ if __name__ == "__main__":
     #        '9M','1Y','18M','2Y','3Y','4Y','5Y',
     #        '6Y','7Y','8Y','9Y','10Y','11Y','12Y','13Y','14Y','15Y',
     #        '20Y','30Y']
-    # types=['SWAP','AWAP','SWAP','SWAP','SWAP','SWAP',
+    # types=['SWAP','SWAP','SWAP','SWAP','SWAP','SWAP',
     #       'SWAP','SWAP','SWAP','SWAP','SWAP','SWAP',
     #       'SWAP','SWAP','SWAP','SWAP','SWAP','SWAP',
     #       'SWAP','SWAP','SWAP']
@@ -385,7 +385,7 @@ if __name__ == "__main__":
     curveset.bootstrap()
 
     # save out put
-    save_output = False
+    save_output = True
     if save_output:
         output = []
         label = ['curve name', 'value date', 'tenor', 'tenor start', 'tenor end', 'quote', 'zero rate', 'error']
@@ -503,13 +503,66 @@ if __name__ == "__main__":
         calendar=UScalendar,
         settledays=2,
         businessday_convention=QLbusiness_convention['ModifiedFollowing'],
-        Leg1Frequency='6m',  # following arguments are for swaps
-        Leg1forcurve='USD3M',  # forcasting curve name
-        Leg1discurve='USDOIS',  # discounting curve name
+        Leg1Frequency='6m',
+        Leg1forcurve='USD3M',
+        Leg1discurve='USDOIS',
         Leg2Frequency='6M',
         Leg2forcurve='USD6M',
         Leg2discurve='USDOIS')
 
     usd_3s6s_1y.assigncurves(curveset.curveset)
     print('USD LIBOR 3S6S 1Y Par Spread:\t{0:.4f}%'.format(usd_3s6s_1y.impliedquote() * 100.0))
+
+    usdsgd_ccs_2y =\
+        cs.CCS(valuationdate=valuationdate,
+               quote=0.0,
+               maturity='2y',
+               settledays=2,
+               businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+               Leg1Daycount=QLdaycount['ACT365'],
+               Leg1Frequency='6m',
+               Leg1forcurve='None',
+               Leg1discurve='SGDCCS',
+               Leg1FixingCalendar=UKcalendar,
+               Leg1PaymentCalendar=USSGcalendar,
+
+               Leg2Daycount=QLdaycount['ACT360'],
+               Leg2Frequency='6m',
+               Leg2forcurve='USD6M',
+               Leg2discurve='USDOIS',
+               Leg2FixingCalendar=UKcalendar,
+               Leg2PaymentCalendar=USSGcalendar,
+               resettable=True,
+               resettableleg=1)
+
+    usdsgd_ccs_2y.assigncurves(curveset.curveset)
+    print('USDSGD CCS 2Y Par Rate:\t{0:.4f}%'.format(usdsgd_ccs_2y.impliedquote() * 100.0))
+
+    usdsgd_ccbs_2y = \
+        cs.CCBS(valuationdate=valuationdate,
+               quote=0.0,
+               maturity='2y',
+               settledays=2,
+               businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+               Leg1Daycount=QLdaycount['ACT365'],
+               Leg1Frequency='6m',
+               Leg1forcurve='SGD6M',
+               Leg1discurve='SGDCCS',
+               Leg1FixingCalendar=SGcalendar,
+               Leg1PaymentCalendar=USSGcalendar,
+
+               Leg2Daycount=QLdaycount['ACT360'],
+               Leg2Frequency='6m',
+               Leg2forcurve='USD6M',
+               Leg2discurve='USDOIS',
+               Leg2FixingCalendar=UKcalendar,
+               Leg2PaymentCalendar=USSGcalendar,
+               resettable=True,
+               resettableleg=1)
+
+    usdsgd_ccbs_2y.assigncurves(curveset.curveset)
+    print('USDSGD CCBS 2Y Par Spread:\t{0:.4f}%'.format(usdsgd_ccbs_2y.impliedquote() * 100.0))
+
+
+
 
