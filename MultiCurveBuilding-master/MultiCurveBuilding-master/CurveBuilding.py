@@ -1,33 +1,38 @@
 import QuantLib as ql
 import CurveSet as cs
 import ZeroCurve as zc
+import logging
+import datetime
+import numpy as np
 import xlwings as xw
-import csv
 from numpy.linalg import inv
 from pandas import DataFrame as df
 
 
-def saveToCSV(data, path=None):
-    writer = csv.writer(open("test1.csv", "w"))
-    writer.writerows(data)
-
-
 if __name__ == "__main__":
+
+    logging.basicConfig(filename='curve builder log.txt', filemode='w', level=logging.DEBUG)
+    logging.info('Curve building job started')
+    start = datetime.datetime.utcnow()
+
     QLdaycount = {
         'ACT360': ql.Actual360(),
         'ACT365': ql.Actual365Fixed(),
         'Thirty360': ql.Thirty360()
     }
+
     QLbusiness_convention = {
         'Following': ql.Following,
         'ModifiedFollowing': ql.ModifiedFollowing
     }
+
     QLcalendar = {
         'UnitedStates': ql.UnitedStates(),
         'Target': ql.TARGET(),
         'Singapore': ql.Singapore(),
         'UnitedKingdom': ql.UnitedKingdom()
     }
+
     valuationdate = ql.Date(13, 7, 2017)
     ql.Settings.instance().evaluationDate = valuationdate
     currencies = ['USD', 'SGD']
@@ -49,30 +54,29 @@ if __name__ == "__main__":
     # SGDFX: SGDFX curve
     # SGDCCS: SGD cross currency curve
 
-    curvelist = []
-    curvelist.append('USDOIS')
-    curvelist.append('USD3M')
-    curvelist.append('USD6M')
-    curvelist.append('SGD6M')
-    curvelist.append('SGDFX')
-    curvelist.append('SGDCCS')
+    curvelist = ['USDOIS', 'USDLOIS', 'USD3M', 'USD6M', 'SGD6M', 'SGDFX', 'SGDCCS']
     marketQuote = dict()
-
     initguessrate = 0.02
     initguessspread = 0.01
+
     print('instruments for USDOIS')
-    tenors = ['ON', 'TN', '1W', '1M', '2M', '3M', '6M',
-              '9M', '1Y', '18M', '2Y', '3Y', '4Y', '5Y',
-              '6Y', '7Y', '8Y', '9Y', '10Y', '12Y', '15Y',
-              '20Y', '25Y', '30Y']
+    tenors = ['ON', 'TN', '1W', '1M', '2M', '3M', '6M', '30y']
     types = ['DEPO', 'DEPO', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS',
-             'OIS', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS',
-             'OIS', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS',
-             'OIS', 'OIS', 'OIS']
+             'OIS']
     quotes = [0.445, 0.46, 0.375, 0.38, 0.3815, 0.381, 0.383,
-              0.394, 0.403, 0.4245, 0.4435, 0.495, 0.544,
-              0.602, 0.669, 0.736, 0.8, 0.858, 0.91, 1.012,
-              1.12, 1.236, 1.295, 1.323]
+              0.394]
+    # tenors = ['ON', 'TN', '1W', '1M', '2M', '3M', '6M',
+    #           '9M', '1Y', '18M', '2Y', '3Y', '4Y', '5Y',
+    #           '6Y', '7Y', '8Y', '9Y', '10Y', '12Y', '15Y',
+    #           '20Y', '25Y', '30Y']
+    # types = ['DEPO', 'DEPO', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS',
+    #          'OIS', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS',
+    #          'OIS', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS', 'OIS',
+    #          'OIS', 'OIS', 'OIS']
+    # quotes = [0.445, 0.46, 0.375, 0.38, 0.3815, 0.381, 0.383,
+    #           0.394, 0.403, 0.4245, 0.4435, 0.495, 0.544,
+    #           0.602, 0.669, 0.736, 0.8, 0.858, 0.91, 1.012,
+    #           1.12, 1.236, 1.295, 1.323]
     quote = list(zip(tenors, types, quotes))
     marketQuote['USDOIS'] = quote
 
@@ -111,6 +115,48 @@ if __name__ == "__main__":
             tenordates.append(ois.enddate)
     curve = zc.ZeroCurve(curvelist[0], valuationdate, tenors, tenordates, zeros)
     curveset.addcurve(curvelist[0], curve)
+
+    # LIBOR-OIS Basis
+    print('instruments for USDLOIS')
+    tenors = ['1Y', '18M', '2Y', '3Y', '4Y', '5Y',
+              '6Y', '7Y', '8Y', '9Y', '10Y', '12Y', '15Y',
+              '20Y', '25Y', '30Y']
+    types = ['BSSWAP'] * len(tenors)
+    quotes = [0.40] * len(tenors)
+    quote = list(zip(tenors, types, quotes))
+    marketQuote['USDLOIS'] = quote
+
+    zeros = []
+    tenordates = []
+    for i in range(len(tenors)):
+        zeros.append(initguessspread)
+        daycount = QLdaycount['ACT360']
+        calendar = UScalendar
+        settledays = 2
+        Leg1Frequency = '3M'
+        Leg1forcurve = 'USDLOIS'
+        Leg2Frequency = '3M'
+        Leg2forcurve = 'USD3M'
+        businessday_convention = QLbusiness_convention['ModifiedFollowing']
+        discurve = 'USDLOIS'
+        paymentlag = 2
+        bsswap = cs.BasisSwap(valuationdate,
+                              quotes[i] / 100,
+                              tenors[i],
+                              daycount,
+                              calendar,
+                              settledays,
+                              businessday_convention,
+                              Leg1Frequency,
+                              Leg1forcurve,
+                              discurve,
+                              Leg2Frequency,
+                              Leg2forcurve,
+                              discurve)
+        curveset.addinstrument(bsswap)
+        tenordates.append(bsswap.enddate)
+    curve = zc.ZeroSpreadCurve(curvelist[1], 'USDOIS', valuationdate, tenors, tenordates, zeros)
+    curveset.addcurve(curvelist[1], curve)
 
     # adding USD3M curve and its instruments to the curve set
     print('instruments for USD3M')
@@ -195,7 +241,7 @@ if __name__ == "__main__":
             Leg2Frequency = '3M'
             Leg2forcurve = 'USD3M'
             businessday_convention = QLbusiness_convention['ModifiedFollowing']
-            discurve = 'USDOIS'
+            discurve = 'USDLOIS'
             swap = cs.Swap(valuationdate,
                            quotes[i] / 100,
                            tenors[i],
@@ -213,8 +259,8 @@ if __name__ == "__main__":
                            discurve)
             curveset.addinstrument(swap)
             tenordates.append(swap.enddate)
-    curve = zc.ZeroCurve(curvelist[1], valuationdate, tenors, tenordates, zeros)
-    curveset.addcurve(curvelist[1], curve)
+    curve = zc.ZeroCurve(curvelist[2], valuationdate, tenors, tenordates, zeros)
+    curveset.addcurve(curvelist[2], curve)
 
     # adding USD6M curve and its instrument to curveset
     print('instruments for USD6M')
@@ -259,8 +305,8 @@ if __name__ == "__main__":
                               discurve)
         curveset.addinstrument(bsswap)
         tenordates.append(bsswap.enddate)
-    curve = zc.ZeroSpreadCurve(curvelist[2], curvelist[1], valuationdate, tenors, tenordates, zeros)
-    curveset.addcurve(curvelist[2], curve)
+    curve = zc.ZeroSpreadCurve(curvelist[3], curvelist[2], valuationdate, tenors, tenordates, zeros)
+    curveset.addcurve(curvelist[3], curve)
 
     print('instruments for SGD6M')
     tenors = ['6M', '1Y', '18M', '2Y', '3Y', '4Y',
@@ -305,8 +351,8 @@ if __name__ == "__main__":
                        discurve)
         curveset.addinstrument(swap)
         tenordates.append(swap.enddate)
-    curve = zc.ZeroCurve(curvelist[3], valuationdate, tenors, tenordates, zeros)
-    curveset.addcurve(curvelist[3], curve)
+    curve = zc.ZeroCurve(curvelist[4], valuationdate, tenors, tenordates, zeros)
+    curveset.addcurve(curvelist[4], curve)
 
     print('instruments for SGDFX')
     tenors = ['ON', 'TN', 'SN', '1W', '2W', '1M', '2M', '3M', '6M',
@@ -330,8 +376,9 @@ if __name__ == "__main__":
                           daycount, calendar, discurve)
         curveset.addinstrument(depo)
         tenordates.append(depo.enddate)
-    curve = zc.ZeroCurve(curvelist[4], valuationdate, tenors, tenordates, zeros)
-    curveset.addcurve(curvelist[4], curve)
+    curve = zc.ZeroCurve(curvelist[5], valuationdate, tenors, tenordates, zeros)
+    curveset.addcurve(curvelist[5], curve)
+
     print('instruments for SGDCCS')
     tenors = ['18M', '2Y', '3Y', '4Y', '5Y', '6Y',
               '7Y', '10Y', '12Y', '15Y', '20Y', '30Y']
@@ -357,7 +404,7 @@ if __name__ == "__main__":
         Leg1discurve = 'SGDCCS'
         Leg2Frequency = '6M'
         Leg2forcurve = 'USD6M'
-        Leg2discurve = 'USDOIS'
+        Leg2discurve = 'USDLOIS'
         businessday_convention = QLbusiness_convention['ModifiedFollowing']
         ccs = cs.CCS(valuationdate,
                      quotes[i] / 100,
@@ -378,17 +425,21 @@ if __name__ == "__main__":
                      paymentcalendar)
         curveset.addinstrument(ccs)
         tenordates.append(ccs.enddate)
-    curve = zc.ZeroSpreadCurve(curvelist[5], 'SGDFX',
+    curve = zc.ZeroSpreadCurve(curvelist[6], 'SGDFX',
                                valuationdate,
                                tenors, tenordates, zeros, nullbeforefirstpillar=True)
-    curveset.addcurve(curvelist[5], curve)
+    curveset.addcurve(curvelist[6], curve)
     curveset.bootstrap()
+
+    end = datetime.datetime.utcnow()
+    logging.info('Curve build completed, total time taken {}'.format(end - start))
 
     # save out put
     save_output = True
     if save_output:
         output = []
         label = ['curve name', 'value date', 'tenor', 'tenor start', 'tenor end', 'quote', 'zero rate', 'error']
+        instrument_names =[]
         for curveName in curveset.curveset.keys():
             print(curveName)
             # print(curveset.curveset[curveName].zerorates)
@@ -398,6 +449,7 @@ if __name__ == "__main__":
                 raise RuntimeError('market quote and zero rate size not same!')
 
             for i, zr in enumerate(zeroCurve.zerorates):
+                instrument_names.append(curveName + "_" + str(zeroCurve.tenors[i]))
                 if market[i][0] == zeroCurve.tenors[i]:
                     row = curveName, zeroCurve.tenors[i], market[i][1], '', \
                           zeroCurve.tenordates[i].serialNumber(), market[i][2], zr, 0.0
@@ -410,15 +462,39 @@ if __name__ == "__main__":
         # print('Jacobian Matrix dR/dZ')
         # print(curveset.DRDZ)
         data = curveset.DRDZ
-        jac = df(data[0:, 0:])
+        jac = df(data[0:, 0:], columns=instrument_names, index=instrument_names)
         jac.to_csv('Jacobian_dRdZ.csv')
-        print('Jacobian Matrix dZ/dR')
-        print(inv(curveset.DRDZ))
+        # print('Jacobian Matrix dZ/dR')
+        # print(inv(curveset.DRDZ))
         data_ = inv(curveset.DRDZ)
-        jac_inv = df(data_[0:, 0:])
+        jac_inv = df(data_[0:, 0:], columns=instrument_names, index=instrument_names)
         jac_inv.to_csv('Jacobian_dZdR.csv')
 
     # some test
+    usd_ois_20y = cs.OIS(valuationdate=valuationdate,
+                        quote=1.0,
+                        maturity='20Y',
+                        calendar=UScalendar,
+                        settledays=2.0,
+                        daycount=QLdaycount['ACT360'],
+                        Frequency='1Y',
+                        curve='USDLOIS')
+
+    usd_ois_20y.assigncurves(curveset.curveset)
+    print('USD OIS 20Y Par Rate:\t{0:.4f}%'.format(usd_ois_20y.impliedquote() * 100.0))
+
+    usd_ois_6m = cs.OIS(valuationdate=valuationdate,
+                        quote=1.0,
+                        maturity='6m',
+                        calendar=UScalendar,
+                        settledays=2.0,
+                        daycount=QLdaycount['ACT360'],
+                        Frequency='6m',
+                        curve='USDOIS')
+
+    usd_ois_6m.assigncurves(curveset.curveset)
+    print('USD OIS 6m Par Rate:\t{0:.4f}%'.format(usd_ois_6m.impliedquote() * 100.0))
+
     usd_6m_2y = cs.Swap(valuationdate=valuationdate,
                         quote=1.0,
                         maturity='2Y',
@@ -429,11 +505,11 @@ if __name__ == "__main__":
                         Leg1daycount=QLdaycount['ACT360'],
                         Leg1Frequency='6M',  # following arguments are for swaps
                         Leg1forcurve=None,  # forcasting curve name
-                        Leg1discurve='USDOIS',  # discounting curve name
+                        Leg1discurve='USDLOIS',  # discounting curve name
                         Leg2daycount=QLdaycount['ACT360'],
                         Leg2Frequency='6M',
                         Leg2forcurve='USD6M',  # must be provided
-                        Leg2discurve='USDOIS')
+                        Leg2discurve='USDLOIS')
 
     usd_6m_2y.assigncurves(curveset.curveset)
     print('USD LIBOR 6M 2Y Par Rate:\t{0:.4f}%'.format(usd_6m_2y.impliedquote() * 100.0))
@@ -512,6 +588,80 @@ if __name__ == "__main__":
 
     usd_3s6s_1y.assigncurves(curveset.curveset)
     print('USD LIBOR 3S6S 1Y Par Spread:\t{0:.4f}%'.format(usd_3s6s_1y.impliedquote() * 100.0))
+    logging.debug('USD LIBOR 3S6S 1Y Par Spread:\t{0:.4f}%'.format(usd_3s6s_1y.impliedquote() * 100.0))
+
+    usdsgd_ccs_2y = \
+        cs.CCS(valuationdate=valuationdate,
+               quote=0.0,
+               maturity='2y',
+               settledays=2,
+               businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+               Leg1Daycount=QLdaycount['ACT365'],
+               Leg1Frequency='6m',
+               Leg1forcurve=None,
+               Leg1discurve='SGDCCS',
+               Leg1FixingCalendar=UKcalendar,
+               Leg1PaymentCalendar=USSGcalendar,
+
+               Leg2Daycount=QLdaycount['ACT360'],
+               Leg2Frequency='6m',
+               Leg2forcurve='USD6M',
+               Leg2discurve='USDOIS',
+               Leg2FixingCalendar=UKcalendar,
+               Leg2PaymentCalendar=USSGcalendar,
+               resettable=True,
+               resettableleg=1)
+
+    usdsgd_ccs_2y.assigncurves(curveset.curveset)
+    print('USDSGD CCS 2Y Par Rate:\t{0:.4f}%'.format(usdsgd_ccs_2y.impliedquote() * 100.0))
+
+    usdsgd_ccbs_2y = \
+        cs.CCBS(valuationdate=valuationdate,
+                quote=0.0,
+                maturity='2y',
+                settledays=2,
+                businessday_convention=QLbusiness_convention['ModifiedFollowing'],
+                Leg1Daycount=QLdaycount['ACT365'],
+                Leg1Frequency='6m',
+                Leg1forcurve='SGD6M',
+                Leg1discurve='SGDCCS',
+                Leg1FixingCalendar=SGcalendar,
+                Leg1PaymentCalendar=USSGcalendar,
+
+                Leg2Daycount=QLdaycount['ACT360'],
+                Leg2Frequency='6m',
+                Leg2forcurve='USD6M',
+                Leg2discurve='USDOIS',
+                Leg2FixingCalendar=UKcalendar,
+                Leg2PaymentCalendar=USSGcalendar,
+                resettable=True,
+                resettableleg=1)
+
+    usdsgd_ccbs_2y.assigncurves(curveset.curveset)
+    print('USDSGD CCBS 2Y Par Spread:\t{0:.4f}%'.format(usdsgd_ccbs_2y.impliedquote() * 100.0))
+
+    zero_sensi = []
+    instrument_names = []
+    npv = usd_3m_1y.QLSWAP.NPV()
+    for curve in curveset.curveset:
+        zeroCurve = curveset.curveset[curve]
+        curve_zero = zeroCurve.zerorates
+        for i in range(len(curve_zero)):
+            instrument_names.append(zeroCurve.name + "_" + str(zeroCurve.tenors[i]))
+            curve_zero[i] += 0.0001
+            zeroCurve.updateZeroRates(curve_zero)
+            bumped_npv = usd_3m_1y.QLSWAP.NPV()
+            zero_sensi.append(bumped_npv - npv)
+            npv = bumped_npv
+    if len(instrument_names) != len(zero_sensi):
+        raise Exception('size wrong')
+    zero_map = dict(zip(instrument_names, zero_sensi))
+    pv01_ladder = np.matmul(inv(curveset.DRDZ), zero_sensi)
+    pv01_map = dict(zip(instrument_names, pv01_ladder))
+    pv01 = df(pv01_map.items(), columns=['instrument name', 'pv01'])
+    pv01.to_csv('pv01.csv')
+
+
 
     usdsgd_ccs_2y =\
         cs.CCS(valuationdate=valuationdate,

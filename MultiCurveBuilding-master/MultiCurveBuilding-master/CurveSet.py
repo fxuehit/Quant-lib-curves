@@ -478,7 +478,7 @@ class CCS(Instrument):  # cross currency swap, can be fix-float or float-float a
         spread1 = []
         gearing1 = []
         fixedrate1 = []
-        if self.Leg1forcurve != 'None':  # float-float CCS
+        if self.Leg1forcurve:  # float-float CCS
             for i, d in enumerate(schedule1):
                 dummyNotional1.append(0.)
                 if self.resettable and self.resettableleg == 1:
@@ -545,12 +545,12 @@ class CCS(Instrument):  # cross currency swap, can be fix-float or float-float a
         self.index = index
 
     def assigncurves(self, curves):
-        if self.Leg1forcurve != 'None':
+        if self.Leg1forcurve:
             self.zLeg1forcurve = curves[self.Leg1forcurve]
         self.zLeg2forcurve = curves[self.Leg2forcurve]
         self.zdiscurve1 = curves[self.Leg1discurve]
         self.zdiscurve2 = curves[self.Leg2discurve]
-        if self.Leg1forcurve != 'None':
+        if self.Leg1forcurve:
             self.IBORIndex1 = ql.IborIndex('IborIndex1',
                                            ql.Period(self.Leg1Frequency),
                                            self.settledays,
@@ -597,7 +597,7 @@ class CCS(Instrument):  # cross currency swap, can be fix-float or float-float a
         gearing1 = []
         fixedrate1 = []
 
-        if self.Leg1forcurve != 'None':  # float-float CCS
+        if self.Leg1forcurve:  # float-float CCS
             for i, d in enumerate(schedule1):
                 dummyNotional1.append(0.)
                 if self.resettable and self.resettableleg == 1:
@@ -688,9 +688,9 @@ class CCS(Instrument):  # cross currency swap, can be fix-float or float-float a
         engine2 = ql.DiscountingSwapEngine(self.zdiscurve2.QLZeroCurve)
         self.QLSWAP2.setPricingEngine(engine2)
         self.zdiscurve1.register(self.index)
-        if (self.Leg1discurve != self.Leg2discurve):
+        if self.Leg1discurve != self.Leg2discurve:
             self.zdiscurve2.register(self.index)
-        if (self.Leg1forcurve != 'None'):
+        if self.Leg1forcurve:
             self.zLeg1forcurve.register(self.index)
         self.zLeg2forcurve.register(self.index)
 
@@ -757,7 +757,7 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
         spread1 = []
         gearing1 = []
         fixedrate1 = []
-        if self.Leg1forcurve != 'None':  # float-float CCS
+        if self.Leg1forcurve:  # float-float CCS
             for i, d in enumerate(schedule1):
                 dummyNotional1.append(0.)
                 if self.resettable and self.resettableleg == 1:
@@ -782,7 +782,7 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
                                                gearing1, spread1, self.Leg1Daycount, True, True,
                                                ql.ModifiedFollowing)
         else:  # fixed-float CCS
-            print('type error')
+            raise Exception('type error, float-float CCS expected')
 
         engine1 = ql.DiscountingSwapEngine(self.zdiscurve1.QLZeroCurve)
         QLSWAP1bumped.setPricingEngine(engine1)
@@ -803,12 +803,12 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
         self.index = index
 
     def assigncurves(self, curves):
-        if self.Leg1forcurve != 'None':
+        if self.Leg1forcurve:
             self.zLeg1forcurve = curves[self.Leg1forcurve]
         self.zLeg2forcurve = curves[self.Leg2forcurve]
         self.zdiscurve1 = curves[self.Leg1discurve]
         self.zdiscurve2 = curves[self.Leg2discurve]
-        if self.Leg1forcurve != 'None':
+        if self.Leg1forcurve:
             self.IBORIndex1 = ql.IborIndex('IborIndex1',
                                            ql.Period(self.Leg1Frequency),
                                            self.settledays,
@@ -819,15 +819,7 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
                                            self.Leg1Daycount,
                                            self.zLeg1forcurve.QLZeroCurve)
         else:
-            self.IBORIndex1 = ql.IborIndex('IborIndex1',
-                                           ql.Period(self.Leg1Frequency),
-                                           self.settledays,
-                                           ql.USDCurrency(),
-                                           self.Leg1FixingCalendar,
-                                           ql.ModifiedFollowing,
-                                           False,
-                                           self.Leg1Daycount,
-                                           self.zdiscurve1.QLZeroCurve)
+            raise Exception('type error, float-float CCS expected')
         self.IBORIndex2 = ql.IborIndex('IborIndex2',
                                        ql.Period(self.Leg2Frequency),
                                        self.settledays,
@@ -855,20 +847,20 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
         gearing1 = []
         fixedrate1 = []
 
-        if self.Leg1forcurve != 'None':  # float-float CCS
+        if self.Leg1forcurve:  # float-float CCS
             for i, d in enumerate(schedule1):
                 dummyNotional1.append(0.)
                 if self.resettable and self.resettableleg == 1:
                     notional = 1000000
                     notional *= self.zdiscurve2.QLZeroCurve.discount(d) / self.zdiscurve1.QLZeroCurve.discount(d)
-                    notional *= self.zdiscurve1.QLZeroCurve.discount(self.startdate) / self.zdiscurve2.QLZeroCurve.discount(self.startdate)
+                    notional *= self.zdiscurve1.QLZeroCurve.discount(
+                        self.startdate) / self.zdiscurve2.QLZeroCurve.discount(self.startdate)
                     Notional1.append(notional)
                 else:
                     Notional1.append(1000000.)
                 gearing1.append(1.0)
                 spread1.append(self.quote)
                 fixedrate1.append(0.0)
-
             dummyNotional1.pop()
             Notional1.pop()
             gearing1.pop()
@@ -877,10 +869,10 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
             swapType1 = ql.VanillaSwap.Payer
             self.QLSWAP1 = ql.NonstandardSwap(swapType1, dummyNotional1, Notional1, schedule1,
                                               fixedrate1, self.Leg1Daycount, schedule1, self.IBORIndex1,
-                                              gearing1, spread1, self.Leg1Daycount, True, True, ql.ModifiedFollowing)
+                                              gearing1, spread1, self.Leg1Daycount, True, True,
+                                              ql.ModifiedFollowing)
         else:  # fixed-float CCS
-            print('type error')
-
+            raise Exception('type error, float-float CCS expected')
         schedule2 = ql.Schedule(self.startdate,
                                 self.enddate,
                                 ql.Period(self.Leg2Frequency),
@@ -899,8 +891,8 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
             if self.resettable and self.resettableleg == 2:
                 notional = 1000000.0
                 notional *= self.zdiscurve1.QLZeroCurve.discount(d) / self.zdiscurve2.QLZeroCurve.discount(d)
-                notional *= self.zdiscurve2.QLZeroCurve.discount(self.startdate) / \
-                            self.zdiscurve1.QLZeroCurve.discount(self.startdate)
+                notional *= self.zdiscurve2.QLZeroCurve.discount(self.startdate) / self.zdiscurve1.QLZeroCurve.discount(
+                    self.startdate)
                 Notional2.append(notional)
 
             else:
@@ -916,16 +908,17 @@ class CCBS(Instrument):  # cross currency basis swap, float-float (resettble)
         swapType2 = ql.VanillaSwap.Payer
         self.QLSWAP2 = ql.NonstandardSwap(swapType2, dummyNotional2, Notional2, schedule2,
                                           fixedrate2, self.Leg2Daycount, schedule2, self.IBORIndex2,
-                                          gearing2, spread2, self.Leg2Daycount, True, True, ql.ModifiedFollowing)
+                                          gearing2, spread2, self.Leg2Daycount, True, True,
+                                          ql.ModifiedFollowing)
 
         engine1 = ql.DiscountingSwapEngine(self.zdiscurve1.QLZeroCurve)
         self.QLSWAP1.setPricingEngine(engine1)
         engine2 = ql.DiscountingSwapEngine(self.zdiscurve2.QLZeroCurve)
         self.QLSWAP2.setPricingEngine(engine2)
         self.zdiscurve1.register(self.index)
-        if (self.Leg1discurve != self.Leg2discurve):
+        if self.Leg1discurve != self.Leg2discurve:
             self.zdiscurve2.register(self.index)
-        if (self.Leg1forcurve != 'None'):
+        if self.Leg1forcurve:
             self.zLeg1forcurve.register(self.index)
         self.zLeg2forcurve.register(self.index)
 
@@ -942,6 +935,7 @@ class CurveSet(object):
         self.quotes = []
         self.calculated = False
         self.valuationdate = valuationdate
+        self.error = []
 
     def addcurve(self, name, curve):
         self.curveset[name] = curve
@@ -964,7 +958,8 @@ class CurveSet(object):
         for i in range(0, len(self.instruments)):
             impliedquote = self.instruments[i].impliedquote()
             error[i] = impliedquote - self.instruments[i].quote
-        print(error)
+        # print(error)
+        self.error.extend(error)
         return error
 
     def jacobian(self, x):
